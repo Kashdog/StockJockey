@@ -44,8 +44,25 @@ class StockEntry(models.Model):
     
     class Meta:
         db_table = "StockEntry"
-        
-class Request(StockEntry):
+
+class Request(models.Model):
+    id = models.AutoField(primary_key=True)
+    stocks = models.ManyToManyField(StockEntry)
     entryfee = models.IntegerField(default=0)
-    contestlength = models.IntegerField(default=0)
-    user = models.ForeignKey(User, unique=True)
+    length = models.IntegerField(default=0)
+    user = models.CharField(max_length=200)
+    matched = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.user
+
+    class Meta:
+        db_table = "Request"
+
+class HeadToHeadMatch(models.Model):
+    user1 = models.OneToOneField(Request, on_delete=models.CASCADE, related_name='firstuser')
+    user2 = models.OneToOneField(Request,on_delete=models.CASCADE, related_name='seconduser')
+
+    class Meta:
+        db_table = "Headtoheadmatch"
+

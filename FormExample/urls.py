@@ -14,6 +14,7 @@ urlpatterns = [
     url(r'^mainpage/$', views.mainpage, name='mainpage'),
     url(r'^h2hrequest/$', views.h2hrequest, name='h2hrequest'), 
     url(r'^headtohead/lineup/$', views.headtoheadlineup, name='headtoheadlineup'),
+    url(r'^headtohead/matches/$', views.headtoheadmatches, name='headtoheadmatches'),
     url(r'^activate/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
         views.activate, name='activate'),
 ]

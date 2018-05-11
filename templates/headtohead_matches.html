@@ -56,15 +56,18 @@
     <section class="business-talking">
 		<!--business-talking-start-->
 		<div class="container">
-			<h2>Create New Line Up</h2>
+			<h2>Your Head to Head Matches</h2>
 		</div>
 	</section>
     <!--business-talking-end-->
 	<div class="container">
 		<section class="main-section contact" id="contact">
 			<div class="row">
-				<div class="col-lg-6 col-sm-7 wow fadeInLeft">
+				<div class="col-lg-12 col-sm-7 wow fadeInLeft">
                     <nav class="navbar navbar-dark bg-dark">
+                        <section class="business-talking-funds">
+                            <h4>Your Matches</h2>
+                        </section>
                         <form class="form-inline">
                             <input class="form-control" type="search" placeholder="Search" aria-label="Search">
                             <button class="btn btn-outline-info" type="submit">Search</button>
@@ -73,83 +76,25 @@
                     <table class="table table-dark">
                         <thead class="thead-light">
                             <tr>
-                                <th>Sector</th>
-                                <th>Name</th>
-                                <th>PPS</th>
-                                <th></th>
+                                <th>$ Won</th>
+                                <th>Status</th>
+                                <th>Entry Fee</th>
+                                <th>Length</th>
+                                <th>Opponent</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for datapoint in data %}
                             <tr id="row{{forloop.counter}}">
-                                <th scope="row">{{datapoint.1}}</th>
-                                <td>{{datapoint.2}}</td>
-                                <td>{{datapoint.4}}</td>
-                                <td id = "button">
-                                    <a href="#" onclick="$('#add{{forloop.counter}}').click();" class="btn btn-success btn-lg">
-                                        <span class="glyphicon glyphicon-plus"></span>
-                                    </a>
-                                    <button type='button' id="add{{forloop.counter}}" onclick="cloneRow(this.parentNode.parentNode.id)" style="display:none;"></button>
-                                </td>
+                                <td>{{results.0}}</td>
+                                <td>{{results.1}}</td>
+                                <td>{{datapoint.user1.entryfee}}</td>
+                                <td>{{datapoint.user1.length}}</td>
+                                <td>{{datapoint.user2.user}}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
                     </table>
-				</div>
-				<div class="col-lg-6 col-sm-5 wow fadeInUp delay-05s">
-                    <nav class="navbar navbar-dark bg-dark inline">
-                        <section class="business-talking-funds">
-                            <h4>Line Up</h2>
-                        </section>
-                        <section class="business-talking-funds">
-                            <h4 id="remainingfunds">Remaining Funds:</h2>
-                        </section>
-                        <section class="business-talking-fundsnumber inline">
-                            <h4 id="remainingfundsnumber">$1000</h2>
-                        </section>
-                    </nav>
-                    <table class="table table-light">
-                        <thead class="thead-dark">
-                            <tr>
-                                <th>Sector</th>
-                                <th>Name</th>
-                                <th>Shares</th>
-                                <th>PPS</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableToModify">
-                        </tbody>
-                    </table>
-                    <div class="form-row">
-                        <div class="form-group col-md-6">
-                            <section class="business-talking-funds inline">
-                                <h4>Entry Fee</h2>
-                            </section>
-                            <select class="form-control" id="entryfee">
-                                <option>1</option>
-                                <option>5</option>
-                                <option>10</option>
-                                <option>25</option>
-                                <option>50</option>
-                            </select>
-                        </div>
-                        <div class="form-group col-md-6">
-                            <section class="business-talking-funds inline">
-                                <h4>Length of Contest</h2>
-                            </section>
-                            <select class="form-control" id="length">
-                                <option value="1">1 day</option>
-                                <option value="2">2 day</option>
-                                <option value="3">3 day</option>
-                                <option value="4">4 day</option>
-                                <option value="5">5 day</option>
-                            </select>
-                        </div>
-                    </div>
-                    <a href="#" onclick="$('#submit').click();" class="btn btn-info btn-lg float-right">
-                        <span class="glyphicon glyphicon-plus"></span>
-                    </a>
-                    <button type='button' id="submit" onclick="post('/h2hrequest/');" style="display:none;"></button>
 				</div>
 			</div>
 		</section>
