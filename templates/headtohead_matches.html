@@ -7,6 +7,7 @@
 
 	<title>Homepage</title>
     {% load static %}
+    {% load FormExample_extras %}
 	<link rel="icon" href="{% static 'FormExample/knight/favicon.png' %}" type="image/png">
     <link rel="shortcut icon" href="{% static 'FormExample/knight/favicon.ico' %}" type="img/x-icon">
 
@@ -77,17 +78,17 @@
                         <thead class="thead-light">
                             <tr>
                                 <th>$ Won</th>
-                                <th>Status</th>
+                                <th>Completed</th>
                                 <th>Entry Fee</th>
                                 <th>Length</th>
                                 <th>Opponent</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for datapoint in data %}
+                            {% for datapoint in data %} 
                             <tr id="row{{forloop.counter}}">
-                                <td>{{results.0}}</td>
-                                <td>{{results.1}}</td>
+                                <td>{{results|index:forloop.counter0|index:0}}</td>
+                                <td>{{results|index:forloop.counter0|index:1}}</td>
                                 <td>{{datapoint.user1.entryfee}}</td>
                                 <td>{{datapoint.user1.length}}</td>
                                 <td>{{datapoint.user2.user}}</td>
@@ -211,17 +212,17 @@
         }
         var csrftoken = getCookie('csrftoken');
 
-            function csrfSafeMethod(method) {
-                // these HTTP methods do not require CSRF protection
-                return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
-            }
-            $.ajaxSetup({
-                beforeSend: function (xhr, settings) {
-                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
-                    }
+        function csrfSafeMethod(method) {
+            // these HTTP methods do not require CSRF protection
+            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+        }
+        $.ajaxSetup({
+            beforeSend: function (xhr, settings) {
+                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
                 }
-            });
+            }
+        });
 
         function post(path) {
             var data = [];

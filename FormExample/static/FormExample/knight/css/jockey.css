@@ -1,0 +1,20 @@
+.glyphicon.glyphicon-plus {
+    font-size: 20px;
+}
+
+p input {
+    border: none;
+    display: inline;
+    font-family: inherit;
+    font-size: inherit;
+    padding: none;
+    padding:  0;
+    width: auto;
+}
+
+.btn-info.disabled, .btn-info:disabled {
+    opacity: 1;
+    color: #fff;
+    background-color: #dc3545;
+    border-color: #dc3545;
+}

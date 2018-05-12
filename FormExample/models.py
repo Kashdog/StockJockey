@@ -24,8 +24,6 @@ class Profile(models.Model):
 class Stock(models.Model):
     sector = models.CharField(max_length=200)
     name = models.CharField(max_length=200)
-    shares = models.IntegerField(default=0)
-    pps = models.IntegerField(default=0)
 
     def __str__(self):
         return self.name
@@ -37,7 +35,6 @@ class StockEntry(models.Model):
     sector = models.CharField(max_length=200)
     name = models.CharField(max_length=200)
     shares = models.IntegerField(default=0)
-    pps = models.IntegerField(default=0)
 
     def __str__(self):
         return self.name

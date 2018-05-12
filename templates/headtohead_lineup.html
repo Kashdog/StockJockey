@@ -7,6 +7,7 @@
 
 	<title>Homepage</title>
     {% load static %}
+    {% load FormExample_extras %}
 	<link rel="icon" href="{% static 'FormExample/knight/favicon.png' %}" type="image/png">
     <link rel="shortcut icon" href="{% static 'FormExample/knight/favicon.ico' %}" type="img/x-icon">
 
@@ -14,13 +15,13 @@
 	<link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300,800italic,700italic,600italic,400italic,300italic,800,700,600' rel='stylesheet' type='text/css'>
 
     <link href="{% static 'FormExample/knight/css/darkbutton.css' %}" rel="stylesheet" type="text/css">
-    <link href="{% static 'FormExample/knight/css/readonlyinput.css' %}" rel="stylesheet" type="text/css">
     <link href="{% static 'FormExample/knight/css/bootstrap.css' %}" rel="stylesheet" type="text/css">
     <link href="{% static 'FormExample/knight/css/bootstrap.min.css' %}" rel="stylesheet" type="text/css">
 	<link href="{% static 'FormExample/knight/css/style.css' %}" rel="stylesheet" type="text/css">
 	<link href="{% static 'FormExample/knight/css/font-awesome.css' %}" rel="stylesheet" type="text/css">
 	<link href="{% static 'FormExample/knight/css/responsive.css' %}" rel="stylesheet" type="text/css">
-	<link href="{% static 'FormExample/knight/css/animate.css' %}" rel="stylesheet" type="text/css">
+    <link href="{% static 'FormExample/knight/css/animate.css' %}" rel="stylesheet" type="text/css">
+    <link href="{% static 'FormExample/knight/css/jockey.css' %}" rel="stylesheet" type="text/css">
 	
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 	<script type="text/javascript" src="{% static 'FormExample/knight/js/jquery.1.8.3.min.js' %}"></script>
@@ -84,7 +85,7 @@
                             <tr id="row{{forloop.counter}}">
                                 <th scope="row">{{datapoint.1}}</th>
                                 <td>{{datapoint.2}}</td>
-                                <td>{{datapoint.4}}</td>
+                                <td>{{prices|index:forloop.counter0}}</td>
                                 <td id = "button">
                                     <a href="#" onclick="$('#add{{forloop.counter}}').click();" class="btn btn-success btn-lg">
                                         <span class="glyphicon glyphicon-plus"></span>
@@ -146,17 +147,16 @@
                             </select>
                         </div>
                     </div>
-                    <a href="#" onclick="$('#submit').click();" class="btn btn-info btn-lg float-right">
+                    <button type='button' id="submit" class="btn btn-info btn-lg float-right" onclick="post('/h2hrequest/');">
                         <span class="glyphicon glyphicon-plus"></span>
-                    </a>
-                    <button type='button' id="submit" onclick="post('/h2hrequest/');" style="display:none;"></button>
+                    </button>
 				</div>
 			</div>
 		</section>
 	</div>
 	<footer class="footer">
 		<div class="container">
-			<div class="footer-logo"><a href="#"><img src="{% static 'FormExample/knight/img/footer-logo.png' %}" alt=""></a></div>
+			<div class="footer-logo"><a href=""><img src="{% static 'FormExample/knight/img/footer-logo.png' %}" alt=""></a></div>
 			<span class="copyright">&copy; Stockjockey</span>
 			</div>
 		</div>
@@ -214,13 +214,22 @@
             for(var i = 0; i < stocktable.children.length; i++){
                 if(stocktable.children.length > 0){
                     funds += stocktable.children[i].children[2].children[0].value * stocktable.children[i].children[3].innerHTML;
+                    if(funds > 1000){
+                        $('#submit').attr('disabled','disabled');
+                    } else{
+                        $('#submit').removeAttr('disabled');
+                    }
                 }
             }
             var remainingfunds = document.getElementById("remainingfunds");
             remainingfunds.innerHTML = "Remaining Funds:";
             var remainingfunds = document.getElementById("remainingfundsnumber");
+            if(funds > 1000){
+                remainingfunds.innerHTML = "Less than 0"
+            } else{
+                remainingfunds.innerHTML = "$" + (1000-funds).toFixed(2);
+            }
             
-            remainingfunds.innerHTML = "$" + (10000-funds);
         };
 
         var cloneFuncCalls = 0;
@@ -294,8 +303,7 @@
                     entry = {
                         "sector":   stocktable.children[i].children[0].innerHTML,
                         "name":     stocktable.children[i].children[1].innerHTML,
-                        "shares":   stocktable.children[i].children[2].children[0].value,
-                        "pps":      stocktable.children[i].children[3].innerHTML
+                        "shares":   stocktable.children[i].children[2].children[0].value
                     };
                     data.push(entry);
                 }

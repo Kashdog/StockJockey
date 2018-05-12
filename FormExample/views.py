@@ -19,7 +19,12 @@ from django.core.mail import EmailMessage
 from django.views.decorators.csrf import ensure_csrf_cookie
 from .models import Contest, Profile, Stock, StockEntry, Request, HeadToHeadMatch
 import json
-import ast
+import sys
+import requests
+import time, datetime
+import csv
+import re
+
 @ensure_csrf_cookie
 
 
@@ -37,7 +42,6 @@ def index(request):
     if request.user.is_authenticated:
         return render(request, 'mainpage.html', {'user': request.user})
     else:
-        template = loader.get_template('index.html')
         return render(request, 'index.html')
 
 def signup(request):
@@ -91,71 +95,8 @@ def signin(request):
         else:
             return render(request, 'index.html', {'error': "Incorrect username or password"})
 def decidewin(request):
+    decidewinreturn = []
     for match in HeadToHeadMatch.objects.filter():
-        '''if str(match.user1) == str(request.user.username):
-            
-        elif str(match.user2) == str(request.user.username):
-            print("user2")'''
-
-        '''import urllib.request
-
-        # create a password manager
-        password_mgr = urllib.request.HTTPPasswordMgrWithDefaultRealm()
-        # Add the username and password.
-        # If we knew the realm, we could use it instead of None.
-        top_level_url = "https://api.tiingo.com/iex/"
-        password_mgr.add_password(None, top_level_url, "kashdog", "kunju123")
-        handler = urllib.request.HTTPBasicAuthHandler(password_mgr)
-        # create "opener" (OpenerDirector instance)
-        opener = urllib.request.build_opener(handler)
-        # use the opener to fetch a URL
-        opener.open('https://api.tiingo.com/iex/' + match.user1.stocks.all()[0].name.lower())
-        opener.open('https://api.tiingo.com/iex/' + match.user1.stocks.all()[0].name.lower() + '/prices?startDate=2018-5-8&endDate=2018-5-9&resampleFreq=1min')
-        opener.open('https://api.tiingo.com/iex/' + match.user2.stocks.all()[0].name.lower())
-        opener.open('https://api.tiingo.com/iex/' + match.user2.stocks.all()[0].name.lower() + '/prices?startDate=2018-5-8&endDate=2018-5-9&resampleFreq=1min')
-        # Install the opener.
-        # Now all calls to urllib.request.urlopen use our opener.
-        urllib.request.install_opener(opener)
-
-        url = 'https://api.tiingo.com/iex/' + match.user1.stocks.all()[0].name.lower()
-        response = urllib.request.urlopen(url)
-        data = response.read()      # a `bytes` object
-        text = data.decode('utf-8') # a `str`; this step can't be used if data is binary
-        print(json.loads(text)[0]['last'])
-        user1endingstockprice = json.loads(text)[0]['last']
-        print(json.loads(text)[0])
-
-        url = 'https://api.tiingo.com/iex/'+ match.user1.stocks.all()[0].name.lower() + '/prices?startDate=2018-5-8&endDate=2018-5-9&resampleFreq=1min'
-        response = urllib.request.urlopen(url)
-        data = response.read()      # a `bytes` object
-        text = data.decode('utf-8') # a `str`; this step can't be used if data is binary
-        print(json.loads(text)[0]['open'])
-        user1startingstockprice = json.loads(text)[0]['open']
-        print(json.loads(text)[0])
-        user1profit = user1endingstockprice -user1startingstockprice
-        print(str(user1profit) + " " + str(match.user1))
-
-        url = 'https://api.tiingo.com/iex/' + match.user2.stocks.all()[0].name.lower()
-        response = urllib.request.urlopen(url)
-        data = response.read()      # a `bytes` object
-        text = data.decode('utf-8') # a `str`; this step can't be used if data is binary
-        print(json.loads(text)[0]['last'])
-        user2endingstockprice = json.loads(text)[0]['last']
-        print(json.loads(text)[0])
-
-        url = 'https://api.tiingo.com/iex/'+ match.user2.stocks.all()[0].name.lower() + '/prices?startDate=2018-5-8&endDate=2018-5-9&resampleFreq=1min'
-        response = urllib.request.urlopen(url)
-        data = response.read()      # a `bytes` object
-        text = data.decode('utf-8') # a `str`; this step can't be used if data is binary
-        print(json.loads(text)[0]['open'])
-        user2startingstockprice = json.loads(text)[0]['open']
-        print(json.loads(text)[0])
-        user2profit = user2endingstockprice -user2startingstockprice
-        print(str(user2profit) + " " + str(match.user2))'''
-
-        import sys
-        import time
-        import requests
 
         apiEndpoint = "https://query1.finance.yahoo.com/v7/finance/quote"
         fields = [
@@ -175,64 +116,6 @@ def decidewin(request):
             'fields': fields,
             'symbols': symbols}
         r = requests.get(apiEndpoint, params=payload)
-
-        import re
-        import sys
-        import time
-        import datetime
-        import requests
-
-        stockarray = []
-
-        def get_cookie_value(r):
-            return {'B': r.cookies['B']}
-
-        def get_page_data(symbol):
-            url = "https://finance.yahoo.com/quote/%s/?p=%s" % (symbol, symbol)
-            r = requests.get(url)
-            cookie = get_cookie_value(r)
-            lines = r.content.decode('unicode-escape').strip(). replace('}', '\n')
-            return cookie, lines.split('\n')
-
-        def find_crumb_store(lines):
-            # Looking for
-            # ,"CrumbStore":{"crumb":"9q.A4D1c.b9
-            for l in lines:
-                if re.findall(r'CrumbStore', l):
-                    return l
-            print("Did not find CrumbStore")
-
-        def split_crumb_store(v):
-            return v.split(':')[2].strip('"')
-
-        def get_cookie_crumb(symbol):
-            cookie, lines = get_page_data(symbol)
-            crumb = split_crumb_store(find_crumb_store(lines))
-            return cookie, crumb
-
-        def get_data(symbol, start_date, end_date, cookie, crumb):
-            filename = '%s.csv' % (symbol)
-            url = "https://query1.finance.yahoo.com/v7/finance/download/%s?period1=%s&period2=%s&interval=1d&events=history&crumb=%s" % (symbol, start_date, end_date, crumb)
-            response = requests.get(url, cookies=cookie)
-            with open (filename, 'wb') as handle:
-                for block in response.iter_content(1024):
-                    handle.write(block)
-            import csv
-            with open('%s.csv' % (symbol), 'rt') as csvfile:
-                spamreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
-                for row in spamreader:
-                    stockarray.append(row)
-                print(stockarray[len(stockarray)-1][0].split(",")[1])
-
-        def get_now_epoch():
-            # @see https://www.linuxquestions.org/questions/programming-9/python-datetime-to-epoch-4175520007/#post5244109
-            return int(time.time())
-
-        def download_quotes(symbol):
-            start_date = 0
-            end_date = get_now_epoch()
-            cookie, crumb = get_cookie_crumb(symbol)
-            get_data(symbol, start_date, end_date, cookie, crumb)
 
         symbol = match.user1.stocks.all()[0].name
         #print("--------------------------------------------------")
@@ -283,19 +166,19 @@ def decidewin(request):
         print(user2profit)
 
 
-        #print("--------------------------------------------------")
+        
+        print(time.strftime("%H:%M:%S", time.localtime()))
+        endtime = time.strftime("%H:%M:%S", time.localtime())
 
         if str(match.user1) == str(request.user.username) and user1profit > user2profit:
-            return([match.user1.entryfee * 1.9, 'Complete'])
+            decidewinreturn.append([match.user1.entryfee * 1.9, endtime])
         elif str(match.user1) == str(request.user.username) and user1profit < user2profit:
-            return([0, 'Complete'])
+            decidewinreturn.append([0, endtime])
         elif str(match.user2) == str(request.user.username) and user1profit > user2profit:
-            return([0, 'Complete'])
+            decidewinreturn.append([0, endtime])
         elif str(match.user2) == str(request.user.username) and user1profit < user2profit:
-            return([match.user2.entryfee * 1.9, 'Complete'])
-
-def doNothing():
-    pass      
+            decidewinreturn.append([match.user2.entryfee * 1.9, endtime])
+    return decidewinreturn     
 
 def headtoheadmatches(request):
     table = HeadToHeadMatch.objects.filter()
@@ -323,11 +206,14 @@ def h2hrequest(request):
         body = json.loads(body_unicode)
         q = Request(user=request.user.username)
         q.save()
-        s = StockEntry(sector=body[1]['sector'], name=body[1]['name'], shares=body[1]['shares'], pps=body[1]['pps'])
-        s.save()
         q.entryfee = body[0]['entryfee'] 
-        q.length = body[0]['length'] 
-        q.stocks.add(s)
+        q.length = body[0]['length']
+        q.save()
+        for x in range(1, len(body)):
+            s = StockEntry(sector=body[x]['sector'], name=body[x]['name'], shares=body[x]['shares'])
+            s.save() 
+            print(s)
+            q.stocks.add(s) 
         q.save()
         match(request)
         cursor = connection.cursor()
@@ -343,4 +229,67 @@ def headtoheadlineup(request):
     cursor = connection.cursor()
     cursor.execute("SELECT * FROM Stock ORDER BY sector")
     table = cursor.fetchall()
-    return render(request, 'headtohead_lineup.html', {'data': table})   
+
+    
+
+    prices = []
+    counter = 0
+    for x in table:
+        download_quotes(table[counter][2])
+        prices.append(round(float(stockarray[len(stockarray)-1][0].split(",")[1]), 2))
+        counter = counter + 1
+    
+    return render(request, 'headtohead_lineup.html', {'data': table, "prices": prices})
+
+
+
+stockarray = []
+
+def get_cookie_value(r):
+    return {'B': r.cookies['B']}
+
+def get_page_data(symbol):
+    url = "https://finance.yahoo.com/quote/%s/?p=%s" % (symbol, symbol)
+    r = requests.get(url)
+    cookie = get_cookie_value(r)
+    lines = r.content.decode('unicode-escape').strip(). replace('}', '\n')
+    return cookie, lines.split('\n')
+
+def find_crumb_store(lines):
+    # Looking for
+    # ,"CrumbStore":{"crumb":"9q.A4D1c.b9
+    for l in lines:
+        if re.findall(r'CrumbStore', l):
+            return l
+    print("Did not find CrumbStore")
+
+def split_crumb_store(v):
+    return v.split(':')[2].strip('"')
+
+def get_cookie_crumb(symbol):
+    cookie, lines = get_page_data(symbol)
+    crumb = split_crumb_store(find_crumb_store(lines))
+    return cookie, crumb
+
+def get_data(symbol, start_date, end_date, cookie, crumb):
+    filename = '%s.csv' % (symbol)
+    url = "https://query1.finance.yahoo.com/v7/finance/download/%s?period1=%s&period2=%s&interval=1d&events=history&crumb=%s" % (symbol, start_date, end_date, crumb)
+    response = requests.get(url, cookies=cookie)
+    with open (filename, 'wb') as handle:
+        for block in response.iter_content(1024):
+            handle.write(block)
+    with open('%s.csv' % (symbol), 'rt') as csvfile:
+        spamreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
+        for row in spamreader:
+            stockarray.append(row)
+        print(stockarray[len(stockarray)-1][0].split(",")[1])
+
+def get_now_epoch():
+    # @see https://www.linuxquestions.org/questions/programming-9/python-datetime-to-epoch-4175520007/#post5244109
+    return int(time.time())
+
+def download_quotes(symbol):
+    start_date = get_now_epoch()
+    end_date = get_now_epoch()
+    cookie, crumb = get_cookie_crumb(symbol)
+    get_data(symbol, start_date, end_date, cookie, crumb)
