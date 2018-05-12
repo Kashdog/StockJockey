@@ -178,6 +178,9 @@ def decidewin(request):
             decidewinreturn.append([0, endtime])
         elif str(match.user2) == str(request.user.username) and user1profit < user2profit:
             decidewinreturn.append([match.user2.entryfee * 1.9, endtime])
+        print(request.user.username)
+        print(match.user1)
+        print(match.user2)
     return decidewinreturn     
 
 def headtoheadmatches(request):
