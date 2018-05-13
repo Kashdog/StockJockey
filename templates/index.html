@@ -19,6 +19,7 @@
 	<link href="{% static 'FormExample/knight/css/responsive.css' %}" rel="stylesheet" type="text/css">
 	<link href="{% static 'FormExample/knight/css/animate.css' %}" rel="stylesheet" type="text/css">
 	
+	<script src="https://unpkg.com/vue"></script> <!-- Vue.js-->
 
 	<script type="text/javascript" src="{% static 'FormExample/knight/js/jquery.1.8.3.min.js' %}"></script>
 	<script type="text/javascript" src="{% static 'FormExample/knight/js/bootstrap.js' %}"></script>
@@ -32,22 +33,66 @@
 </head>
 
 <body>
-	<nav class="main-nav-outer" id="test">
-		<div class="container">
-			<ul class="main-nav">
-				<li><a href="#header">Home</a></li>
-				<li><a href="#service">Services</a></li>
-				<li><a href="#Portfolio">Portfolio</a></li>
-				<li class="small-logo"><a href="#header"><img src="{% static 'FormExample/knight/img/small-logo.png' %}" alt=""></a></li>
-				<li><a href="#client">Clients</a></li>
-				<li><a href="/signup/">Sign Up</a></li>
-				<li><a href="#" onclick="$('#loginBtn').click();">Log In</a></li>
-				<button type='button' id="loginBtn" style="display:none;" data-toggle="modal" data-target="#login">Open Log In Window</button>
-				
-			</ul>
-			<a class="res-nav_click" href="#"><i class="fa fa-bars"></i></a>
-		</div>
-	</nav>
+	<div id="nav">
+		<navbar></navbar>
+	</div>
+
+	<template id="navbar">
+		<nav class="main-nav-outer" id="test">
+			<div class="container">
+				<ul class="main-nav">
+					<li v-for="(text, index) in textbeforelogo">
+						<a v-bind:href=[linkbeforelogo[index]]>[[  text ]]</a>
+					</li>
+					<li class="small-logo"><a href="#header"><smalllogo></smalllogo></a></li>
+					<li v-for="(text, index) in textafterlogo">
+						<a v-bind:href=[linkafterlogo[index]]>[[  text ]]</a>
+					</li>
+					<li><a href="#" onclick="$('#loginBtn').click();">Log In</a>
+						<button 
+							type="button" id="loginBtn"
+							style="display:none;"
+							data-toggle="modal" data-target="#login">
+						</button>
+					</li>
+
+					
+				</ul>
+				<a class="res-nav_click" href="#"><i class="fa fa-bars"></i></a>
+			</div>
+		</nav>
+	</template>
+
+	<script>
+        Vue.component('navbar', {
+			template: '#navbar',
+			delimiters: ['[[', ']]'],
+			data() {
+				return {
+					textbeforelogo: ["Home", "Services", "Portfo"],
+	                textafterlogo: 	["Clients", "Sign Up"],
+	                linkbeforelogo: ["#header", "#service", "#Portfolio"],
+					linkafterlogo:	["#client", "/signup/"]
+				}
+			}
+			});
+
+		Vue.component('smalllogo', {
+			delimiters: ['[[', ']]'],
+			data: {
+			},
+			template: `
+			<img src="{% static 'FormExample/knight/img/small-logo.png' %}" alt="">
+			`
+		})
+
+
+		new Vue({
+            delimiters: ['[[', ']]'],
+            el: '#nav',
+        })
+    </script>
+
 	<div class="modal fade" id="login">
 		<div class="modal-dialog">
 			<div class="modal-content">

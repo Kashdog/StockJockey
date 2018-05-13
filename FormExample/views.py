@@ -289,8 +289,6 @@ def get_now_epoch():
 def download_quotes(symbol):
     start_date = get_now_epoch()
     end_date = get_now_epoch()
-    print(start_date)
-    print(datetime.datetime.today().weekday())
     if datetime.datetime.today().weekday() == 5:
         start_date = start_date - 60*60*24
         end_date = end_date - 60*60*24
