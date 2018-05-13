@@ -127,6 +127,8 @@ def decidewin(request):
 
         user1startingstockprice = float(stockarray[len(stockarray)-1][0].split(",")[1])
         user1profit = user1endingstockprice - user1startingstockprice
+        print(user1startingstockprice)
+        print(user1endingstockprice)
         print(user1profit)
     
 
@@ -153,7 +155,6 @@ def decidewin(request):
         }
         r = requests.get(apiEndpoint, params=payload)
         for i in r.json()['quoteResponse']['result']:
-            print(i['regularMarketPrice'])
             user2endingstockprice = float(i['regularMarketPrice'])
 
             
@@ -163,11 +164,12 @@ def decidewin(request):
 
         user2startingstockprice = float(stockarray[len(stockarray)-1][0].split(",")[1])
         user2profit = user2endingstockprice - user2startingstockprice
+        print(user2startingstockprice)
+        print(user2endingstockprice)
         print(user2profit)
 
 
         
-        print(time.strftime("%H:%M:%S", time.localtime()))
         endtime = time.strftime("%H:%M:%S", time.localtime())
 
         if str(match.user1) == str(request.user.username) and user1profit > user2profit:
@@ -178,15 +180,11 @@ def decidewin(request):
             decidewinreturn.append([0, endtime])
         elif str(match.user2) == str(request.user.username) and user1profit < user2profit:
             decidewinreturn.append([match.user2.entryfee * 1.9, endtime])
-        print(request.user.username)
-        print(match.user1)
-        print(match.user2)
     return decidewinreturn     
 
 def headtoheadmatches(request):
     table = HeadToHeadMatch.objects.filter()
     whowon = decidewin(request)
-    print(whowon)
     return render(request, 'headtohead_matches.html', {'data': table, 'results': whowon})
 
 def match(request):
@@ -197,7 +195,6 @@ def match(request):
         while(Request.objects.exclude(user=request.user.username).filter(entryfee=userRequest.entryfee, length=userRequest.length, matched=False).count() < 1):
             pass
         opponentRequest = Request.objects.exclude(user=request.user.username).filter(entryfee=userRequest.entryfee, length=userRequest.length, matched=False)[0]
-        print("I am: " + userRequest.user + " Opponent: " + opponentRequest.user)
         opponentRequest.matched=True
         opponentRequest.save()
         m = HeadToHeadMatch(user1=userRequest, user2=opponentRequest)
@@ -215,7 +212,6 @@ def h2hrequest(request):
         for x in range(1, len(body)):
             s = StockEntry(sector=body[x]['sector'], name=body[x]['name'], shares=body[x]['shares'])
             s.save() 
-            print(s)
             q.stocks.add(s) 
         q.save()
         match(request)
@@ -285,7 +281,6 @@ def get_data(symbol, start_date, end_date, cookie, crumb):
         spamreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
         for row in spamreader:
             stockarray.append(row)
-        print(stockarray[len(stockarray)-1][0].split(",")[1])
 
 def get_now_epoch():
     # @see https://www.linuxquestions.org/questions/programming-9/python-datetime-to-epoch-4175520007/#post5244109
@@ -294,5 +289,13 @@ def get_now_epoch():
 def download_quotes(symbol):
     start_date = get_now_epoch()
     end_date = get_now_epoch()
+    print(start_date)
+    print(datetime.datetime.today().weekday())
+    if datetime.datetime.today().weekday() == 5:
+        start_date = start_date - 60*60*24
+        end_date = end_date - 60*60*24
+    if datetime.datetime.today().weekday() == 6:
+        start_date = start_date - 60*60*24*2
+        end_date = end_date - 60*60*24*2
     cookie, crumb = get_cookie_crumb(symbol)
     get_data(symbol, start_date, end_date, cookie, crumb)
