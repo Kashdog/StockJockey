@@ -238,6 +238,7 @@
             var row = document.getElementById(rowid); // find row to copy
             var table = document.getElementById("tableToModify"); // find table to append to
             var clone = row.cloneNode(true); // copy children too
+            $("#"+rowid).remove();
             var pps = clone.children[2];
             clone.children[3].remove();
             clone.children[2].remove();

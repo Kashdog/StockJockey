@@ -49,6 +49,8 @@ class Request(models.Model):
     length = models.IntegerField(default=0)
     user = models.CharField(max_length=200)
     matched = models.BooleanField(default=False)
+    startdate = models.DateTimeField(auto_now_add=True)
+    enddate = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.user

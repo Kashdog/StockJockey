@@ -91,7 +91,7 @@ def signin(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect('home')
+            return redirect('headtoheadlineup')
         else:
             return render(request, 'index.html', {'error': "Incorrect username or password"})
 def decidewin(request):
@@ -192,11 +192,18 @@ def match(request):
         userRequest = Request.objects.filter(user=request.user.username, matched=False)[0]
         userRequest.matched=True
         userRequest.save()
-        while(Request.objects.exclude(user=request.user.username).filter(entryfee=userRequest.entryfee, length=userRequest.length, matched=False).count() < 1):
+        opponent = Request.objects.exclude(user=request.user.username).filter(entryfee=userRequest.entryfee, matched=False)
+        timematches = []
+        for o in opponent:
+            if opponent.startdate.date == userRequest.startdate.date and opponent.enddate.date == userRequest.enddate.date:
+                timematches.append(o)
+        
+        while(Request.objects.exclude(user=request.user.username).filter(entryfee=userRequest.entryfee, matched=False).count() < 1):
             pass
         opponentRequest = Request.objects.exclude(user=request.user.username).filter(entryfee=userRequest.entryfee, length=userRequest.length, matched=False)[0]
         opponentRequest.matched=True
         opponentRequest.save()
+        print(opponentRequest)
         m = HeadToHeadMatch(user1=userRequest, user2=opponentRequest)
         m.save()
 
@@ -204,7 +211,7 @@ def h2hrequest(request):
     if request.method == 'POST':
         body_unicode = request.body.decode('utf-8')
         body = json.loads(body_unicode)
-        q = Request(user=request.user.username)
+        q = Request(user=request.user.username, startdate=datetime.date.today(), enddate=datetime.date.today() + datetime.timedelta(days=int(body[0]['length'])-1))
         q.save()
         q.entryfee = body[0]['entryfee'] 
         q.length = body[0]['length']
@@ -289,11 +296,16 @@ def get_now_epoch():
 def download_quotes(symbol):
     start_date = get_now_epoch()
     end_date = get_now_epoch()
+    print(datetime.datetime.today().hour)
     if datetime.datetime.today().weekday() == 5:
         start_date = start_date - 60*60*24
         end_date = end_date - 60*60*24
-    if datetime.datetime.today().weekday() == 6:
+    elif datetime.datetime.today().weekday() == 6:
         start_date = start_date - 60*60*24*2
         end_date = end_date - 60*60*24*2
+    elif datetime.datetime.today().weekday() == 0 and datetime.datetime.today().hour < 9:
+        start_date = start_date - 60*60*24*3 + 60 * 60 * 9
+        end_date = end_date - 60*60*24*3 + 60 * 60 * 9
+    
     cookie, crumb = get_cookie_crumb(symbol)
     get_data(symbol, start_date, end_date, cookie, crumb)

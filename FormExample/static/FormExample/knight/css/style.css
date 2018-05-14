@@ -97,8 +97,8 @@ p{
 
 .header{
 	text-align:center;
-	background:url(../img/pw_maze_black_2X.png) left top repeat;
-	padding:150px 0;
+    background: #000000 left top repeat;
+    padding: 100px 0;
 }
 .logo{
 	width:130px;
@@ -233,7 +233,7 @@ color: #fff;
 	font-style:normal;
 	font-size:38px;
 	display:block;
-	color:#222;
+	color:#fff;
 	font-family: 'FontAwesome';
 	line-height:38px;
 }
