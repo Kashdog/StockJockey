@@ -192,20 +192,21 @@ def match(request):
         userRequest = Request.objects.filter(user=request.user.username, matched=False)[0]
         userRequest.matched=True
         userRequest.save()
-        opponent = Request.objects.exclude(user=request.user.username).filter(entryfee=userRequest.entryfee, matched=False)
-        timematches = []
-        for o in opponent:
-            if opponent.startdate.date == userRequest.startdate.date and opponent.enddate.date == userRequest.enddate.date:
-                timematches.append(o)
+        print(userRequest)
         
-        while(Request.objects.exclude(user=request.user.username).filter(entryfee=userRequest.entryfee, matched=False).count() < 1):
-            pass
-        opponentRequest = Request.objects.exclude(user=request.user.username).filter(entryfee=userRequest.entryfee, length=userRequest.length, matched=False)[0]
+        timematches = []
+        while(len(timematches) < 1):
+            opponent = Request.objects.exclude(user=request.user.username).filter(entryfee=userRequest.entryfee, matched=False)
+            for o in opponent:
+                if opponent.startdate.date() == userRequest.startdate.date() and opponent.enddate.date() == userRequest.enddate.date():
+                    timematches.append(o)
+        opponentRequest = timematches[0]
         opponentRequest.matched=True
         opponentRequest.save()
         print(opponentRequest)
         m = HeadToHeadMatch(user1=userRequest, user2=opponentRequest)
         m.save()
+        print(m)
 
 def h2hrequest(request):
     if request.method == 'POST':
@@ -280,6 +281,7 @@ def get_cookie_crumb(symbol):
 def get_data(symbol, start_date, end_date, cookie, crumb):
     filename = '%s.csv' % (symbol)
     url = "https://query1.finance.yahoo.com/v7/finance/download/%s?period1=%s&period2=%s&interval=1d&events=history&crumb=%s" % (symbol, start_date, end_date, crumb)
+    print(url)
     response = requests.get(url, cookies=cookie)
     with open (filename, 'wb') as handle:
         for block in response.iter_content(1024):
@@ -296,7 +298,6 @@ def get_now_epoch():
 def download_quotes(symbol):
     start_date = get_now_epoch()
     end_date = get_now_epoch()
-    print(datetime.datetime.today().hour)
     if datetime.datetime.today().weekday() == 5:
         start_date = start_date - 60*60*24
         end_date = end_date - 60*60*24
@@ -304,8 +305,8 @@ def download_quotes(symbol):
         start_date = start_date - 60*60*24*2
         end_date = end_date - 60*60*24*2
     elif datetime.datetime.today().weekday() == 0 and datetime.datetime.today().hour < 9:
-        start_date = start_date - 60*60*24*3 + 60 * 60 * 9
-        end_date = end_date - 60*60*24*3 + 60 * 60 * 9
+        start_date = start_date - 60*60*24*3
+        end_date = end_date - 60*60*24*3
     
     cookie, crumb = get_cookie_crumb(symbol)
     get_data(symbol, start_date, end_date, cookie, crumb)
